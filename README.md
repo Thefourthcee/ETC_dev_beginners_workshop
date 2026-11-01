@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="dev_logo.jpg" alt="Dev Workshop Logo" width="140" />
+  <img src="imgs/dev_logo.jpg" alt="Dev Workshop Logo" width="140" />
 
   # Dev Workshop Series: Building for the Web and Beyond
   **ENSIA Tech Community**
