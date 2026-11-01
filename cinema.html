@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 Dev Workshop Cinema</title>
+<style>
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+  }
+
+  /* ── Ceiling & Projector ── */
+  .ceiling {
+    width: 100%;
+    height: 36px;
+    background: #111118;
+    position: relative;
+    z-index: 10;
+  }
+  .projector {
+    position: absolute;
+    left: 50%;
+    bottom: -22px;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 26px;
+    background: #222;
+    border-radius: 0 0 10px 10px;
+    border: 2px solid #333;
+    border-top: none;
+  }
+  .projector::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ffd700, 0 0 50px #ffd70088;
+    animation: flicker 3s infinite;
+  }
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── Light Cone ── */
+  .light-cone {
+    width: 80px;
+    height: 60px;
+    background: linear-gradient(
+      180deg,
+      rgba(255,215,0,0.15) 0%,
+      rgba(255,255,255,0.02) 100%
+    );
+    clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+    margin-top: -2px;
+  }
+
+  /* ── Movie Screen ── */
+  .screen-wrapper {
+    perspective: 800px;
+    margin-top: 5px;
+    width: 92%;
+    max-width: 1100px;
+  }
+  .screen {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    border: 4px solid #333;
+    border-radius: 8px;
+    padding: 35px 30px 30px;
+    text-align: center;
+    transform: rotateX(2deg);
+    box-shadow:
+      0 0 80px rgba(100, 140, 255, 0.15),
+      0 0 150px rgba(100, 140, 255, 0.05),
+      inset 0 0 100px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .screen-logo {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border-radius: 8px;
+    opacity: 0.9;
+    z-index: 5;
+  }
+  .screen::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.012) 2px,
+      rgba(255,255,255,0.012) 4px
+    );
+    animation: scanlines 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scanlines {
+    from { transform: translateY(0); }
+    to { transform: translateY(4px); }
+  }
+  .screen h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 8px;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.5);
+    margin-bottom: 2px;
+  }
+  .screen .subtitle {
+    font-size: 1rem;
+    color: #8eafd4;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  /* ── Names on Screen (Credits) ── removed */
+
+  .screen .tagline {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #556;
+    font-style: italic;
+  }
+
+  /* ── Theater Room ── */
+  .theater {
+    width: 100%;
+    max-width: 1800px;
+    margin-top: 40px;
+    padding-bottom: 50px;
+    perspective: 800px;
+  }
+
+  /* ── Seat Rows ── */
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    transform-origin: center top;
+  }
+  .row:nth-child(1) { transform: scale(0.68); margin-bottom: -30px; }
+  .row:nth-child(2) { transform: scale(0.76); margin-bottom: -20px; }
+  .row:nth-child(3) { transform: scale(0.84); margin-bottom: -12px; }
+  .row:nth-child(4) { transform: scale(0.92); margin-bottom: -4px; }
+  .row:nth-child(5) { transform: scale(1.00); }
+
+  .row-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: #c0392b;
+    text-shadow: 0 0 8px rgba(192,57,43,0.5);
+  }
+
+  /* ── Individual Seat ── */
+  .seat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    cursor: default;
+    transition: transform 0.2s;
+  }
+  .seat:hover { transform: translateY(-6px); }
+  .seat:hover .person-head { transform: scale(1.15); }
+  .seat:hover .name-tag { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+
+  /* ── Person (head + body silhouette) ── */
+  .person {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin-bottom: -10px;
+    z-index: 2;
+  }
+  .person-head {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  /* 3D Glasses */
+  .glasses {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 18px;
+  }
+  /* Eyes (when glasses are removed) */
+  .eyes {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 17px;
+  }
+  .person-body {
+    width: 68px;
+    height: 40px;
+    margin: -4px auto 0;
+    border-radius: 18px 18px 0 0;
+  }
+
+  /* ── Chair SVG ── */
+  .chair-svg {
+    width: 130px;
+    height: 82px;
+    margin-top: -4px;
+  }
+
+  /* ── Name Tag ── */
+  .name-tag {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #ccc;
+    text-align: center;
+    margin-top: 5px;
+    max-width: 175px;
+    line-height: 1.2;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+
+  /* ── Exit Signs ── */
+  .exit-signs {
+    display: flex;
+    justify-content: space-between;
+    width: 94%;
+    max-width: 1150px;
+    margin-top: 12px;
+  }
+  .exit-sign {
+    background: #1a6b1a;
+    color: #4dff4d;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    padding: 4px 14px;
+    border-radius: 3px;
+    letter-spacing: 3px;
+    box-shadow: 0 0 14px rgba(77,255,77,0.3);
+  }
+
+
+  @keyframes float {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(10deg); }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- Ceiling + Projector -->
+<div class="ceiling">
+  <div class="projector"></div>
+</div>
+<div class="light-cone"></div>
+
+<!-- Movie Screen -->
+<div class="screen-wrapper">
+  <div class="screen">
+    <img src="imgs/dev_logo.jpg" onerror="this.src='dev_logo.jpg'" alt="Dev Workshop Logo" class="screen-logo">
+    <h1>Dev Workshop: The Movie</h1>
+  </div>
+</div>
+
+<!-- Exit Signs -->
+<div class="exit-signs">
+  <div class="exit-sign">◀ EXIT</div>
+  <div class="exit-sign">EXIT ▶</div>
+</div>
+
+<!-- Theater Seats -->
+<div class="theater" id="theater"></div>
+
+<script>
+// =========================================================================
+// 🎯 GIT ASSIGNMENT (Session 02):
+// 1. Find your name in the `students` list below.
+// 2. Set `glasses: false` (to take off your 3D glasses).
+// 3. Choose your `eyeColor` (e.g. "brown", "dark", "hazel", "green", "blue", "amber", or hex like "#2ecc71").
+// 4. Commit your change and submit a Pull Request!
+// =========================================================================
+const students = [
+  { first: "Ghofrane", last: "Slama", glasses: true, eyeColor: "dark" },
+  { first: "Youcef", last: "Hefassa", glasses: true, eyeColor: "dark" },
+  { first: "Chouaib A.", last: "Khebabza", glasses: true, eyeColor: "hazel" },
+  { first: "Narimane", last: "Chabni", glasses: true, eyeColor: "brown" },
+  { first: "Roula Selina", last: "Hemache", glasses: true, eyeColor: "dark" },
+  { first: "Mohamed Y.", last: "Saci", glasses: true, eyeColor: "brown" },
+  { first: "Ritaj", last: "Zekkour", glasses: true, eyeColor: "dark" },
+  { first: "Maram", last: "Dahmani", glasses: true, eyeColor: "brown" },
+  { first: "Layth", last: "Bellar", glasses: true, eyeColor: "hazel" },
+  { first: "Meriem", last: "Aoudar", glasses: true, eyeColor: "brown" },
+  { first: "Meriem", last: "Assassi", glasses: true, eyeColor: "dark" },
+  { first: "Ayat", last: "Naidja", glasses: true, eyeColor: "brown" },
+  { first: "Taher M.", last: "Moulai", glasses: true, eyeColor: "dark" },
+  { first: "Amina", last: "A. El Hirtsi", glasses: true, eyeColor: "brown" },
+  { first: "Zakaria", last: "Belhadj", glasses: true, eyeColor: "dark" },
+  { first: "Sidra", last: "Saidouni", glasses: true, eyeColor: "brown" },
+  { first: "Sami", last: "Gani", glasses: true, eyeColor: "hazel" },
+  { first: "Alaa", last: "Hallaci", glasses: true, eyeColor: "dark" },
+  { first: "Oumaima", last: "Belkadi", glasses: true, eyeColor: "brown" },
+  { first: "Meriem", last: "Sayah", glasses: true, eyeColor: "dark" },
+  { first: "Khiera I.", last: "Guelladress", glasses: true, eyeColor: "brown" },
+  { first: "Chiheb A.", last: "Benlarbi", glasses: true, eyeColor: "dark" },
+  { first: "Amrane", last: "Zyat", glasses: true, eyeColor: "hazel" },
+  { first: "Esraa", last: "Belkella", glasses: true, eyeColor: "brown" },
+  { first: "Takwa", last: "Babaa", glasses: true, eyeColor: "dark" },
+  { first: "Djazira", last: "Oussedik", glasses: true, eyeColor: "brown" },
+  { first: "Ayman A.", last: "Aliouche", glasses: true, eyeColor: "dark" },
+  { first: "Yacine", last: "A. Messaoud", glasses: true, eyeColor: "hazel" },
+  { first: "Ritedj", last: "Bouteba", glasses: true, eyeColor: "brown" },
+  { first: "Khadidja", last: "Hasnaoui", glasses: true, eyeColor: "dark" },
+  { first: "Melissa", last: "Benlalam", glasses: true, eyeColor: "brown" },
+  { first: "Wissem", last: "Chellal", glasses: true, eyeColor: "dark" },
+  { first: "Zineddine", last: "Guedj", glasses: true, eyeColor: "hazel" },
+  { first: "Bourhane", last: "Mss", glasses: true, eyeColor: "dark" },
+  { first: "Nourhane", last: "Ouramdane", glasses: true, eyeColor: "brown" },
+  { first: "Med-Issam", last: "Chebarli", glasses: true, eyeColor: "dark" },
+  { first: "Abderrahmane", last: "Harir", glasses: true, eyeColor: "hazel" },
+  { first: "Tasnime", last: "Boukou", glasses: true, eyeColor: "brown" },
+  { first: "Nada", last: "Azil", glasses: true, eyeColor: "dark" },
+  { first: "Aya", last: "Abdelouahab", glasses: true, eyeColor: "brown" },
+];
+
+// Colors for variety
+const palette = [
+  { head: "#f4c28d", body: "#e74c3c" },
+  { head: "#d4a56a", body: "#3498db" },
+  { head: "#f0d5a8", body: "#2ecc71" },
+  { head: "#c68c53", body: "#9b59b6" },
+  { head: "#f5d0a9", body: "#e67e22" },
+  { head: "#d4a373", body: "#1abc9c" },
+  { head: "#f0c9a0", body: "#e84393" },
+  { head: "#c9956b", body: "#0984e3" },
+  { head: "#f4d9b0", body: "#6c5ce7" },
+  { head: "#dbb78d", body: "#00b894" },
+  { head: "#f0c088", body: "#fd79a8" },
+  { head: "#d09060", body: "#00cec9" },
+];
+
+
+// ── Build Theater Seats ──
+function createGlassesSVG() {
+  return `<svg class="glasses" viewBox="0 0 24 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="1" width="10" height="7" rx="1.5" fill="#e74c3c" opacity="0.85"/>
+    <rect x="14" y="1" width="10" height="7" rx="1.5" fill="#3498db" opacity="0.85"/>
+    <rect x="10" y="3" width="4" height="2" rx="0.5" fill="#333"/>
+    <rect x="0" y="1" width="10" height="7" rx="1.5" stroke="#222" stroke-width="0.6" fill="none"/>
+    <rect x="14" y="1" width="10" height="7" rx="1.5" stroke="#222" stroke-width="0.6" fill="none"/>
+  </svg>`;
+}
+
+function createEyesSVG(eyeColor) {
+  const colorMap = {
+    brown: "#5c3818",
+    dark: "#221d1a",
+    hazel: "#8d6e3f",
+    green: "#27ae60",
+    blue: "#2980b9",
+    amber: "#c67d0a",
+    grey: "#7f8c8d",
+    gray: "#7f8c8d",
+    black: "#111111"
+  };
+  const color = colorMap[(eyeColor || "").toLowerCase()] || eyeColor || "#4a3728";
+
+  return `<svg class="eyes" viewBox="0 0 36 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Left Eye -->
+    <ellipse cx="10" cy="7" rx="5.5" ry="5.5" fill="#ffffff"/>
+    <circle cx="10" cy="7" r="3.6" fill="${color}"/>
+    <circle cx="10" cy="7" r="2" fill="#111111"/>
+    <circle cx="8.8" cy="5.6" r="1" fill="#ffffff"/>
+    <!-- Right Eye -->
+    <ellipse cx="26" cy="7" rx="5.5" ry="5.5" fill="#ffffff"/>
+    <circle cx="26" cy="7" r="3.6" fill="${color}"/>
+    <circle cx="26" cy="7" r="2" fill="#111111"/>
+    <circle cx="24.8" cy="5.6" r="1" fill="#ffffff"/>
+  </svg>`;
+}
+
+function createChairSVG() {
+  return `<svg class="chair-svg" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="0" width="44" height="16" rx="4" fill="#c0392b"/>
+    <rect x="8" y="0" width="44" height="16" rx="4" fill="url(#cushion)" opacity="0.3"/>
+    <rect x="10" y="-14" width="40" height="18" rx="4" fill="#a93226"/>
+    <rect x="3" y="-4" width="6" height="22" rx="2" fill="#7f1d1d"/>
+    <rect x="51" y="-4" width="6" height="22" rx="2" fill="#7f1d1d"/>
+    <rect x="18" y="16" width="24" height="4" rx="1" fill="#4a1010"/>
+    <rect x="16" y="20" width="4" height="14" rx="1" fill="#333"/>
+    <rect x="40" y="20" width="4" height="14" rx="1" fill="#333"/>
+    <rect x="12" y="33" width="36" height="3" rx="1.5" fill="#1a1a1a"/>
+  </svg>`;
+}
+
+// SVG defs
+const svgDefs = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+svgDefs.style.position = "absolute";
+svgDefs.style.width = "0";
+svgDefs.style.height = "0";
+svgDefs.innerHTML = `<defs>
+  <linearGradient id="cushion" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#fff" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.2"/>
+  </linearGradient>
+</defs>`;
+document.body.appendChild(svgDefs);
+
+const theater = document.getElementById('theater');
+
+for (let r = 0; r < 5; r++) {
+
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const labelL = document.createElement('div');
+  labelL.className = 'row-label';
+  row.appendChild(labelL);
+
+  for (let s = 0; s < 8; s++) {
+    const idx = r * 8 + s;
+    const student = students[idx];
+    const colors = palette[idx % palette.length];
+
+    const seat = document.createElement('div');
+    seat.className = 'seat';
+
+    const person = document.createElement('div');
+    person.className = 'person';
+
+    const head = document.createElement('div');
+    head.className = 'person-head';
+    head.style.backgroundColor = colors.head;
+
+    // Show custom eyes if glasses are removed, otherwise wear 3D glasses!
+    if (student.glasses === false) {
+      head.innerHTML = createEyesSVG(student.eyeColor);
+    } else {
+      head.innerHTML = createGlassesSVG();
+    }
+
+    const body = document.createElement('div');
+    body.className = 'person-body';
+    body.style.backgroundColor = colors.body;
+
+    person.appendChild(head);
+    person.appendChild(body);
+
+    const chairDiv = document.createElement('div');
+    chairDiv.innerHTML = createChairSVG();
+
+    const nameTag = document.createElement('div');
+    nameTag.className = 'name-tag';
+    nameTag.textContent = `${student.first} ${student.last}`;
+
+    seat.appendChild(person);
+    seat.appendChild(chairDiv);
+    seat.appendChild(nameTag);
+    row.appendChild(seat);
+  }
+
+  const labelR = document.createElement('div');
+  row.appendChild(labelR);
+
+  theater.appendChild(row);
+}
+
+</script>
+</body>
+</html>
