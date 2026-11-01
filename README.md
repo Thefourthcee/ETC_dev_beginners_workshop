@@ -37,20 +37,6 @@ We use Harvard's CS50W curriculum as our roadmap for the core web sessions, then
 6. **Production & Operations**
    Automated testing, continuous integration and delivery (CI/CD), server configuration, and cloud deployment.
 
----
-
-### Projects
-
-Theory only matters when you apply it. Participants build six complete projects throughout the series:
-
-- **Search:** Google-style front-end interface
-- **Wiki:** Markdown-based encyclopedia platform
-- **Commerce:** Online auction and bidding marketplace
-- **Mail:** Single-page email client using APIs
-- **Network:** Full-featured social network
-- **Capstone:** An original, production-ready application designed and built from scratch
-
----
 
 ### Requirements
 
